@@ -16,6 +16,7 @@ BH1750 lightMeter;
 Ticker tickerSendData;
 
 AdafruitIO_WiFi io(IO_USERNAME, IO_KEY, WIFI_SSID, WIFI_PASSWORD);
+AdafruitIO_Feed *feedLuxMeter = io.feed("luxMeter");
 AdafruitIO_Feed *feedHumidity = io.feed("humidity");
 AdafruitIO_Feed *feedTemperature = io.feed("temperature");
 AdafruitIO_Feed *feedLedRed = io.feed("ledRed");
@@ -29,6 +30,7 @@ void onSendData()
     float lux = lightMeter.readLightLevel();
     feedHumidity->save(fHumidity);
     feedTemperature->save(fTemperature);
+    feedLuxMeter->save(lux);
     Serial.printf("Humidity: %.2f, Temperature: %.2f, Light: %.2f \n",
        fHumidity, fTemperature, lux);
     digitalWrite(LED_YELLOW, (fHumidity > 80)?HIGH:LOW);
@@ -47,7 +49,7 @@ void setup() {
   dht.setup(DHT_PIN, DHTesp::DHT11);
   Wire.begin();
   lightMeter.begin(); 
-  tickerSendData.attach(5, onSendData);
+  tickerSendData.attach(30, onSendData);
   Serial.print("Connecting to Adafruit IO...");
   io.connect();
   // set message handler to read feed from dashboard
